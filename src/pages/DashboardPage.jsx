@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { MapContainer, TileLayer, Marker, Popup, Polygon } from "react-leaflet";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Icon } from "leaflet";
 import AlertCard from "../components/AlertCard";
 import "./DashboardPage.css";
@@ -16,24 +16,23 @@ const touristIcon = new Icon({
   iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
-  shadowSize: [41, 41],
-  className: "live-tourist-marker",
 });
 
 function DashboardPage() {
   const [alerts, setAlerts] = useState([]);
   const [geofences, setGeofences] = useState([]);
   const [liveLocations, setLiveLocations] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
-  const mapCenter = [20.5937, 78.9629];
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const { alertType } = useParams();
   const mapRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
+        setError("");
         const token = localStorage.getItem("authToken");
         if (!token) {
           navigate("/login");
@@ -46,48 +45,46 @@ function DashboardPage() {
         ]);
         setAlerts(alertsResponse.data);
         setGeofences(geofencesResponse.data);
-      } catch (error) {
-        console.error("Failed to fetch data:", error);
-        if (error.response && [401, 403].includes(error.response.status)) {
+      } catch (err) {
+        if (err.response?.status === 401) {
           navigate("/login");
+        } else {
+          setError("Failed to load dashboard data.");
         }
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchData();
-    const intervalId = setInterval(fetchData, 30000);
 
     const ws = new WebSocket("ws://localhost:3000");
-    ws.onopen = () => console.log("WebSocket connected");
-    ws.onclose = () => console.log("WebSocket disconnected");
     ws.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      if (message.type === "LOCATION_UPDATE") {
-        const { touristId, lat, lon } = message.payload;
-        setLiveLocations((prev) => ({ ...prev, [touristId]: { lat, lon } }));
+      if (message.type === "ALERT_NEW") {
+        setAlerts((prev) => [message.payload, ...prev]);
       }
-
       if (message.type === "ALERT_UPDATE") {
-        const updatedAlert = message.payload;
-        setAlerts((prevAlerts) =>
-          prevAlerts.map((alert) =>
-            alert.id === updatedAlert.id ? updatedAlert : alert
-          )
+        setAlerts((prev) =>
+          prev.map((a) => (a.id === message.payload.id ? message.payload : a))
         );
       }
+      if (message.type === "LOCATION_UPDATE") {
+        setLiveLocations((prev) => ({
+          ...prev,
+          [message.payload.touristId]: message.payload,
+        }));
+      }
     };
-
-    return () => {
-      clearInterval(intervalId);
-      ws.close();
-    };
+    return () => ws.close();
   }, [navigate]);
 
+  // --- THIS IS THE FIX ---
+  // This effect runs once after the component mounts and tells the map to resize.
   useEffect(() => {
     setTimeout(() => {
-      if (mapRef.current) mapRef.current.invalidateSize();
+      if (mapRef.current) {
+        mapRef.current.invalidateSize();
+      }
     }, 100);
   }, []);
 
@@ -101,7 +98,6 @@ function DashboardPage() {
       );
     } catch (error) {
       console.error("Failed to update alert status:", error);
-      alert("Could not update the alert status. Please try again.");
     }
   };
 
@@ -117,73 +113,92 @@ function DashboardPage() {
   if (isLoading) {
     return <div className="loading-container">Loading Dashboard...</div>;
   }
+  if (error) {
+    return <div className="loading-container">{error}</div>;
+  }
 
   const sortedAlerts = [...alerts].sort((a, b) => {
-    const statusOrder = { new: 1, acknowledged: 2, resolved: 3 };
-    if (statusOrder[a.status] < statusOrder[b.status]) return -1;
-    if (statusOrder[a.status] > statusOrder[b.status]) return 1;
-    return new Date(b.timestamp) - new Date(a.timestamp);
+    const statusOrder = { new: 1, active: 1, acknowledged: 2, resolved: 3 };
+    return (
+      statusOrder[a.status] - statusOrder[b.status] ||
+      new Date(b.timestamp) - new Date(a.timestamp)
+    );
   });
 
   const panicAlerts = sortedAlerts.filter((a) => a.type === "panic");
   const geoFenceAlerts = sortedAlerts.filter((a) => a.type === "geo_fence");
   const inactivityAlerts = sortedAlerts.filter((a) => a.type === "inactivity");
+  const routeDeviationAlerts = sortedAlerts.filter(
+    (a) => a.type === "route_deviation"
+  );
 
-  const renderAlerts = (alertList) => {
-    return alertList.length > 0 ? (
-      alertList.map((alert) => (
-        <AlertCard
-          key={alert.id}
-          alert={alert}
-          onUpdateStatus={handleUpdateAlertStatus}
-        />
-      ))
-    ) : (
-      <p className="no-alerts-message">No active alerts of this type.</p>
-    );
-  };
+  const alertsToDisplay =
+    {
+      panic: panicAlerts,
+      geo_fence: geoFenceAlerts,
+      inactivity: inactivityAlerts,
+      route_deviation: routeDeviationAlerts,
+    }[alertType] || [];
 
   return (
     <div className="dashboard-layout">
-      <div className="alerts-panel">
-        <div className="panel-section">
-          <h2 className="panel-title">
-            Inactivity Alerts ({inactivityAlerts.length})
-          </h2>
-          <div className="alerts-container">
-            {renderAlerts(inactivityAlerts)}
+      {alertType ? (
+        <div className="alerts-panel single-view">
+          <div className="panel-section">
+            <h2 className="panel-title">
+              {alertType.replace("_", " ")} Alerts ({alertsToDisplay.length})
+            </h2>
+            <div className="alerts-container">
+              {alertsToDisplay.length > 0 ? (
+                alertsToDisplay.map((alert) => (
+                  <AlertCard
+                    key={alert.id}
+                    alert={alert}
+                    onUpdateStatus={handleUpdateAlertStatus}
+                  />
+                ))
+              ) : (
+                <p className="no-alerts-message">
+                  No active alerts of this type.
+                </p>
+              )}
+            </div>
           </div>
         </div>
-        <div className="panel-section">
-          <h2 className="panel-title">
-            Geo-Fence Alerts ({geoFenceAlerts.length})
-          </h2>
-          <div className="alerts-container">{renderAlerts(geoFenceAlerts)}</div>
+      ) : (
+        <div className="dashboard-summary">
+          <h1>Welcome to TourSafe</h1>
+          <p>Select an alert category from the sidebar to view details.</p>
+          <div className="stats-container">
+            <div className="stat-card">
+              <span>{panicAlerts.length}</span> Panic Alerts
+            </div>
+            <div className="stat-card">
+              <span>{geoFenceAlerts.length}</span> Geo-Fence Alerts
+            </div>
+            <div className="stat-card">
+              <span>{inactivityAlerts.length}</span> Inactivity Alerts
+            </div>
+            <div className="stat-card">
+              <span>{routeDeviationAlerts.length}</span> Route Deviation Alerts
+            </div>
+          </div>
         </div>
-        <div className="panel-section">
-          <h2 className="panel-title">Panic Alerts ({panicAlerts.length})</h2>
-          <div className="alerts-container">{renderAlerts(panicAlerts)}</div>
-        </div>
-      </div>
+      )}
 
-      {/* --- THIS IS THE MAP SECTION THAT WAS MISSING --- */}
       <div className="map-view">
         <MapContainer
           ref={mapRef}
-          center={mapCenter}
+          center={[20.5937, 78.9629]}
           zoom={5}
           style={{ height: "100%", width: "100%" }}
         >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          />
+          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
           {geofences.map((fence) => {
-            const positions = fence.polygon_geojson.coordinates[0].map((p) => [
-              p[1],
-              p[0],
-            ]);
+            if (!fence?.polygon_geojson?.coordinates?.[0]?.length) {
+              return null;
+            }
             return (
               <Polygon
                 key={fence.id}
@@ -191,7 +206,10 @@ function DashboardPage() {
                   color: getZoneColor(fence.risk_level),
                   fillOpacity: 0.2,
                 }}
-                positions={positions}
+                positions={fence.polygon_geojson.coordinates[0].map((p) => [
+                  p[1],
+                  p[0],
+                ])}
               >
                 <Popup>
                   {fence.name}
@@ -202,31 +220,35 @@ function DashboardPage() {
             );
           })}
 
-          {alerts.map((alert) => (
-            <Marker key={alert.id} position={[alert.lat, alert.lon]}>
-              <Popup>
-                <b>{alert.type.toUpperCase().replace("_", " ")} Alert</b>
-                <br />
-                Tourist:{" "}
-                {alert.Tourist?.name || alert.tourist_id.substring(0, 8)}...
-                <br />
-                <button onClick={() => handleDownloadFir(alert.id)}>
-                  Generate E-FIR
-                </button>
-              </Popup>
-            </Marker>
-          ))}
+          {alerts.map((alert) => {
+            if (alert.lat == null || alert.lon == null) {
+              return null;
+            }
+            return (
+              <Marker key={alert.id} position={[alert.lat, alert.lon]}>
+                <Popup>
+                  <b>{alert.type.replace("_", " ").toUpperCase()} ALERT</b>
+                  <br />
+                  Tourist: {alert.Tourist?.name}
+                  <br />
+                  <button onClick={() => handleDownloadFir(alert.id)}>
+                    Generate E-FIR
+                  </button>
+                </Popup>
+              </Marker>
+            );
+          })}
 
-          {Object.entries(liveLocations).map(([touristId, location]) => (
+          {Object.values(liveLocations).map((loc) => (
             <Marker
-              key={`live-${touristId}`}
-              position={[location.lat, location.lon]}
+              key={loc.touristId}
+              position={[loc.lat, loc.lon]}
               icon={touristIcon}
             >
               <Popup>
                 <b>Live Location</b>
                 <br />
-                Tourist ID: {touristId.substring(0, 8)}...
+                Tourist ID: {loc.touristId.substring(0, 8)}...
               </Popup>
             </Marker>
           ))}

@@ -1,10 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import "./Sidebar.css";
-// Add FaUsers to the import
-import { FaTachometerAlt, FaUserPlus, FaUsers } from "react-icons/fa";
+import {
+  FaTachometerAlt,
+  FaUserPlus,
+  FaUsers,
+  FaChevronDown,
+} from "react-icons/fa";
 
 function Sidebar({ isCollapsed }) {
+  const [isAlertsOpen, setAlertsOpen] = useState(true);
+
   return (
     <div className={`sidebar ${isCollapsed ? "collapsed" : ""}`}>
       <div className="sidebar-header">
@@ -13,12 +19,41 @@ function Sidebar({ isCollapsed }) {
       <nav>
         <ul>
           <li>
-            <NavLink to="/dashboard">
+            {/* --- CHANGE 1: Main item is now a NavLink to the 'All Alerts' view --- */}
+            <NavLink
+              to="/dashboard"
+              className="dropdown-toggle"
+              onClick={() => !isCollapsed && setAlertsOpen(!isAlertsOpen)}
+            >
               <FaTachometerAlt className="nav-icon" />
               {!isCollapsed && <span>Alerts Dashboard</span>}
+              {!isCollapsed && (
+                <FaChevronDown
+                  className={`chevron ${isAlertsOpen ? "open" : ""}`}
+                />
+              )}
             </NavLink>
+
+            {isAlertsOpen && !isCollapsed && (
+              <ul className="sub-menu">
+                {/* --- CHANGE 2: "All Alerts" link is removed --- */}
+                <li>
+                  <NavLink to="/dashboard/panic">Panic</NavLink>
+                </li>
+                <li>
+                  <NavLink to="/dashboard/geo_fence">Geo-Fence</NavLink>
+                </li>
+                <li>
+                  <NavLink to="/dashboard/inactivity">Inactivity</NavLink>
+                </li>
+                <li>
+                  <NavLink to="/dashboard/route_deviation">
+                    Route Deviation
+                  </NavLink>
+                </li>
+              </ul>
+            )}
           </li>
-          {/* --- NEW LINK FOR TOURIST MANAGEMENT --- */}
           <li>
             <NavLink to="/tourists">
               <FaUsers className="nav-icon" />

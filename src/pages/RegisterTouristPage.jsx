@@ -7,12 +7,11 @@ function RegisterTouristPage() {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
-    password: "password123", // Default password for on-spot registration
+    password: "password123",
     kycType: "Aadhaar",
     kycData: "",
-    itinerary: "",
-    visitFrom: "",
-    visitTo: "",
+    startLocation: "",
+    endLocation: "", // Changed from itinerary
   });
   const [registrationResult, setRegistrationResult] = useState(null);
   const [error, setError] = useState("");
@@ -36,10 +35,10 @@ function RegisterTouristPage() {
         kycType: formData.kycType,
         kycData: formData.kycData,
         itinerary: {
-          places: formData.itinerary,
-          from: formData.visitFrom,
-          to: formData.visitTo,
+          startLocation: formData.startLocation,
+          endLocation: formData.endLocation,
         },
+        // --- FIX: Added this line back ---
         emergencyContacts: [],
       };
 
@@ -119,11 +118,20 @@ function RegisterTouristPage() {
                   required
                 />
               </div>
-              <div className="form-group full-width">
-                <label>Places (e.g., Chennai to Agra)</label>
+              <div className="form-group">
+                <label>Start Location</label>
                 <input
                   type="text"
-                  name="itinerary"
+                  name="startLocation"
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>End Location</label>
+                <input
+                  type="text"
+                  name="endLocation"
                   onChange={handleChange}
                   required
                 />

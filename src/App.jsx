@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+
 import {
   BrowserRouter,
   Routes,
@@ -56,6 +57,7 @@ function App() {
 
             {/* --- ADD ROUTE FOR NEW PAGE --- */}
             <Route path="/tourists" element={<TouristListPage />} />
+            <Route path="/dashboard/:alertType?" element={<DashboardPage />} />
 
             <Route path="/" element={<Navigate to="/dashboard" />} />
           </Route>

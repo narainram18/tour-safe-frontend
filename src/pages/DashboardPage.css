@@ -6,6 +6,7 @@
   left: 0;
   right: 0;
   bottom: 0;
+  height: 100%; /* Use height instead of absolute positioning */
 }
 
 .alerts-panel {
@@ -79,4 +80,55 @@
   height: 100%;
   font-size: 1.5rem;
   color: #555;
+}
+/* ... (all your existing styles) ... */
+
+/* --- NEW STYLES FOR SUMMARY VIEW --- */
+.dashboard-summary {
+  width: 380px;
+  flex-shrink: 0;
+  background-color: #ffffff;
+  border-right: 1px solid var(--border-color);
+  padding: 2rem;
+  text-align: center;
+  color: #333;
+}
+
+.dashboard-summary h1 {
+  margin-top: 0;
+  font-size: 1.8rem;
+}
+
+.stats-container {
+  margin-top: 2rem;
+  display: grid;
+  /* This creates a two-column grid */
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.stat-card {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border: 1px solid #e0e0e0;
+}
+
+.stat-card span {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  color: var(--primary-color);
+}
+
+.alerts-panel.single-view {
+  width: 380px;
+  flex-shrink: 0;
+  background-color: #ffffff;
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
 }

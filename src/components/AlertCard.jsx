@@ -1,5 +1,3 @@
-// File: react-dashboard/src/components/AlertCard.jsx
-
 import React from "react";
 import { Link } from "react-router-dom";
 import {
@@ -9,8 +7,10 @@ import {
   FaExclamationTriangle,
   FaMapSigns,
   FaHourglassHalf,
+  FaRoute,
   FaCheckCircle,
   FaExclamationCircle,
+  FaQuestionCircle,
 } from "react-icons/fa";
 import "./AlertCard.css";
 
@@ -18,10 +18,12 @@ const alertMeta = {
   panic: { icon: <FaExclamationTriangle />, title: "Panic Alert" },
   geo_fence: { icon: <FaMapSigns />, title: "Geo-Fence Breach" },
   inactivity: { icon: <FaHourglassHalf />, title: "Inactivity Alert" },
+  route_deviation: { icon: <FaRoute />, title: "Route Deviation" },
 };
+const defaultMeta = { icon: <FaQuestionCircle />, title: "Unknown Alert" };
 
 const AlertCard = ({ alert, onUpdateStatus }) => {
-  const meta = alertMeta[alert.type] || {};
+  const meta = alertMeta[alert.type] || defaultMeta;
 
   const handleButtonClick = (e, newStatus) => {
     e.preventDefault();
@@ -33,7 +35,7 @@ const AlertCard = ({ alert, onUpdateStatus }) => {
     <Link to={`/tourist/${alert.tourist_id}`} className="alert-card-link">
       <div className={`alert-card ${alert.type} status-${alert.status}`}>
         <div className="alert-card-header">
-          <span className="alert-icon">{meta.icon} </span>
+          <span className="alert-icon">{meta.icon}</span>
           <h3 className="alert-title">{meta.title}</h3>
           <span className="alert-status-badge">{alert.status}</span>
         </div>
@@ -50,13 +52,19 @@ const AlertCard = ({ alert, onUpdateStatus }) => {
             <FaClock className="info-icon" />
             <span>{new Date(alert.timestamp).toLocaleString()}</span>
           </div>
+
+          {/* --- THIS IS THE FIX --- */}
+          {/* It now checks if lat/lon exist before trying to display them */}
           <div className="info-row">
             <FaMapMarkerAlt className="info-icon" />
             <span>
               <b>Location:</b>{" "}
-              {`${alert.lat.toFixed(4)}, ${alert.lon.toFixed(4)}`}
+              {alert.lat != null && alert.lon != null
+                ? `${alert.lat.toFixed(4)}, ${alert.lon.toFixed(4)}`
+                : "N/A"}
             </span>
           </div>
+
           {alert.extra?.message && (
             <div className="info-row">
               <span>
@@ -74,7 +82,7 @@ const AlertCard = ({ alert, onUpdateStatus }) => {
         </div>
 
         <div className="alert-card-actions">
-          {alert.status === "new" && (
+          {(alert.status === "new" || alert.status === "active") && (
             <button
               className="action-btn acknowledge"
               onClick={(e) => handleButtonClick(e, "acknowledged")}
@@ -82,8 +90,7 @@ const AlertCard = ({ alert, onUpdateStatus }) => {
               <FaExclamationCircle /> Acknowledge
             </button>
           )}
-          {/* --- THE FIX: Show Resolve button for 'acknowledged' OR 'active' --- */}
-          {(alert.status === "acknowledged" || alert.status === "active") && (
+          {alert.status === "acknowledged" && (
             <button
               className="action-btn resolve"
               onClick={(e) => handleButtonClick(e, "resolved")}
