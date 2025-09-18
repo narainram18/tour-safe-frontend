@@ -1,32 +1,37 @@
 .login-page-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    135deg,
+    var(--background-start),
+    var(--background-end)
+  );
 }
 
 .login-card {
-  width: 100%;
-  max-width: 400px;
-  padding: 2.5rem;
-  background-color: white;
+  width: 400px;
+  padding: 3rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: var(--border-radius);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px 0 var(--glass-shadow);
   text-align: center;
 }
 
 .login-title {
-  font-size: 24px;
+  font-size: 2rem;
   font-weight: 700;
-  margin-bottom: 0.5rem;
   color: var(--text-primary);
+  margin-bottom: 1rem;
 }
 
 .login-subtitle {
-  font-size: 16px;
   color: var(--text-secondary);
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
 }
 
 .input-group {
@@ -36,44 +41,47 @@
 
 .input-group label {
   display: block;
+  font-weight: 500;
   margin-bottom: 0.5rem;
-  font-weight: 600;
-  font-size: 14px;
 }
 
 .input-group input {
   width: 100%;
-  padding: 12px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  font-size: 16px;
+  padding: 14px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition: all var(--transition-speed);
   box-sizing: border-box;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 10px var(--accent-color);
 }
 
 .login-button {
   width: 100%;
   padding: 14px;
   border: none;
-  background-color: var(--primary-color);
+  border-radius: 8px;
+  background-color: var(--accent-color);
   color: white;
-  font-size: 16px;
-  font-weight: bold;
-  border-radius: var(--border-radius);
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all var(--transition-speed);
 }
 
 .login-button:hover {
-  background-color: #3a7bd5;
-}
-
-.login-button:disabled {
-  background-color: #a0aec0;
-  cursor: not-allowed;
+  background-color: var(--accent-hover);
+  box-shadow: 0 0 15px var(--accent-color);
 }
 
 .error-message {
-  color: var(--danger-color);
-  margin-top: -1rem;
-  margin-bottom: 1rem;
+  color: var(--danger-glow);
+  margin-top: 1rem;
 }

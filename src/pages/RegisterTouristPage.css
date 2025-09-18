@@ -1,85 +1,141 @@
 .page-container {
-  padding: 2rem;
+  padding: 0;
 }
 
-.form-card {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+.page-title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
 }
 
-.form-title {
-  text-align: center;
-  margin-bottom: 2rem;
-  color: #2c3e50;
+.glass-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--border-radius);
+  padding: 2.5rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px 0 var(--glass-shadow);
 }
 
+/* Form Styles */
 .form-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 1.5rem;
 }
-
 .form-group {
   display: flex;
   flex-direction: column;
 }
-
 .form-group.full-width {
   grid-column: 1 / -1;
 }
-
 .form-group label {
   margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #555;
+  font-weight: 500;
 }
-
 .form-group input,
 .form-group select {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  color: var(--text-primary);
   font-size: 1rem;
-  box-sizing: border-box; /* Important for consistent sizing */
 }
-
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 10px var(--accent-color);
+}
 .submit-btn {
   width: 100%;
-  padding: 0.8rem;
-  margin-top: 2rem;
-  background-color: #16a085;
-  color: white;
+  padding: 14px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
+  background-color: var(--accent-color);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 1.1rem;
-  font-weight: bold;
-  transition: background-color 0.2s;
+  transition: all var(--transition-speed);
+  margin-top: 1.5rem;
 }
-
-.submit-btn:disabled {
-  background-color: #95a5a6;
-  cursor: not-allowed;
+.submit-btn:hover {
+  background-color: var(--accent-hover);
+  box-shadow: 0 0 15px var(--accent-color);
 }
-
-.submit-btn:hover:not(:disabled) {
-  background-color: #1abc9c;
-}
-
-.error-message {
-  color: #e74c3c;
-  text-align: center;
-  margin-top: 1rem;
-}
-
 .qr-container {
+  text-align: center;
+}
+
+/* Table Styles */
+.table-container {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th,
+td {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--glass-border);
+}
+thead {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+th {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+tbody tr {
+  cursor: pointer;
+  transition: background-color var(--transition-speed);
+}
+tbody tr:hover {
+  background-color: var(--glass-border);
+}
+
+/* Tourist Details Styles */
+.details-page-layout {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
+  height: 100%;
+}
+.profile-panel {
+  width: 450px;
+  flex-shrink: 0;
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  padding: 2.5rem;
+  overflow-y: auto;
+}
+.map-view-details {
+  flex-grow: 1;
+}
+.profile-info p {
+  margin: 0.75rem 0;
+  font-size: 1rem;
+}
+.profile-info strong {
+  color: var(--text-secondary);
+  margin-right: 10px;
+}
+.alert-history-list {
+  list-style: none;
+  padding: 0;
+}
+.alert-history-list li {
+  background: rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 8px;
 }

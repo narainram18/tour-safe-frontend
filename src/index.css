@@ -1,41 +1,75 @@
+/* --- NEW: Import professional font and Leaflet CSS --- */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 @import "leaflet/dist/leaflet.css";
 
-/* ... rest of your css ... */
+/* --- NEW: Gorgeous color palette and variables --- */
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --font-main: "Poppins", sans-serif;
+  --primary-glow: #00aaff;
+  --danger-glow: #ff4757;
+  --warning-glow: #ffa502;
+  --safe-glow: #2ed573;
+  --info-glow: #5352ed;
+  --background-start: #1e1e2d;
+  --background-end: #12121c;
+  --glass-bg: rgba(44, 44, 60, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: rgba(0, 0, 0, 0.2);
+  --text-primary: #f1f2f6;
+  --text-secondary: #a4b0be;
+  --accent-color: #00aaff;
+  --accent-hover: #0077cc;
+  --border-radius: 12px;
+  --transition-speed: 0.3s;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
+/* --- MERGED: Original boilerplate with new styles applied --- */
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
+  font-family: var(--font-main); /* Use new font */
+  background: linear-gradient(
+    135deg,
+    var(--background-start),
+    var(--background-end)
+  ); /* Use new background */
+  background-attachment: fixed;
+  color: var(--text-primary); /* Use new text color */
+  overflow: hidden; /* Prevent body scroll */
   min-height: 100vh;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* --- NEW: Scrollbar styling --- */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-color);
+}
+
+/* --- KEPT: Original boilerplate styles for basic elements --- */
+a {
+  font-weight: 500;
+  color: var(--accent-color); /* Use new accent color */
+  text-decoration: inherit;
+}
+a:hover {
+  color: var(--accent-hover);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text-primary);
 }
 
 button {
@@ -45,27 +79,12 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: all 0.25s;
+  background-color: transparent; /* Make buttons transparent by default */
+  color: var(--text-primary);
 }
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+/* Add this to the end of index.css */
+* {
+  font-family: var(--font-main);
 }

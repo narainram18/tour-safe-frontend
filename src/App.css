@@ -2,17 +2,23 @@
   display: flex;
   height: 100vh;
   width: 100vw;
+  background: linear-gradient(
+    135deg,
+    var(--background-start),
+    var(--background-end)
+  );
 }
 
 .content-wrapper {
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
-  flex-grow: 1;
-  width: 100%;
+  height: 100vh;
 }
 
 .main-content {
   flex-grow: 1;
   overflow-y: auto;
   position: relative;
+  padding: 1.5rem 2rem;
 }
